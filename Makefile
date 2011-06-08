@@ -15,12 +15,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 DEPDIR=depends
-
-# "Machine-dependant" options
-MFLAGS=-fPIC
-
-CFLAGS=-c -g -O3 -Wall -Werror -Isrc -Irender $(MFLAGS)
-LDFLAGS=-g -O3 -Wall -Werror $(MFLAGS)
+FLAGS=-g -O3 -Wall -Werror -m32 -mmacosx-version-min=10.5 --sysroot /Developer/SDKs/MacOSX10.5.sdk
+CFLAGS=-Isrc -Irender -fPIC $(FLAGS)
+LDFLAGS=$(FLAGS)
 CC=gcc
 
 all:		libupskirt.so upskirt smartypants
@@ -46,8 +43,7 @@ smartypants: examples/smartypants.o src/buffer.o render/html_smartypants.o
 # housekeeping
 clean:
 	rm -f src/*.o render/*.o examples/*.o
-	rm -f libupskirt.so libupskirt.so.1 upskirt smartypants
-	rm -f upskirt.exe smartypants.exe
+	rm -f libupskirt.so libupskirt.so.1 upskirt
 	rm -rf $(DEPDIR)
 
 
