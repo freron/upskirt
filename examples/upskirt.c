@@ -19,6 +19,7 @@
 #include "buffer.h"
 
 #include <errno.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +31,9 @@
 int
 main(int argc, char **argv)
 {
+	unsigned int render_flags = HTML_SKIP_HTML | HTML_SKIP_STYLE;
+	unsigned int enabled_extensions = MKDEXT_TABLES | MKDEXT_FENCED_CODE;
+	
 	struct buf *ib, *ob;
 	size_t ret;
 	FILE *in = stdin;
@@ -62,8 +66,8 @@ main(int argc, char **argv)
 	for (i = 0; i < iterations; ++i) {
 		ob->size = 0;
 
-		upshtml_renderer(&renderer, 0);
-		ups_markdown(ob, ib, &renderer, ~0);
+		upshtml_renderer(&renderer, render_flags);
+		ups_markdown(ob, ib, &renderer, enabled_extensions);
 		upshtml_free_renderer(&renderer);
 	}
 
