@@ -31,7 +31,7 @@
 int
 main(int argc, char **argv)
 {
-	unsigned int render_flags = HTML_SKIP_HTML | HTML_SKIP_STYLE;
+	unsigned int render_flags = HTML_SKIP_HTML | HTML_SKIP_STYLE | HTML_HARD_WRAP;
 	unsigned int enabled_extensions = MKDEXT_TABLES | MKDEXT_FENCED_CODE;
 	
 	struct buf *ib, *ob;
