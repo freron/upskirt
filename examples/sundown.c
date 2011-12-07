@@ -31,14 +31,15 @@
 int
 main(int argc, char **argv)
 {
-	unsigned int render_flags = HTML_SKIP_HTML | HTML_SKIP_STYLE | HTML_HARD_WRAP;
-	unsigned int enabled_extensions = MKDEXT_TABLES | MKDEXT_FENCED_CODE;
-	
 	struct buf *ib, *ob;
-	size_t ret;
+	int ret;
 	FILE *in = stdin;
-	struct mkd_renderer renderer;
-	size_t i, iterations = 1;
+	unsigned int enabled_extensions = MKDEXT_TABLES | MKDEXT_FENCED_CODE;
+
+	struct sd_callbacks callbacks;
+	struct html_renderopt options;
+	options.flags = HTML_SKIP_HTML | HTML_SKIP_STYLE | HTML_HARD_WRAP;
+	struct sd_markdown *markdown;
 
 	/* opening the file if given from the command line */
 	if (argc > 1) {
@@ -63,22 +64,19 @@ main(int argc, char **argv)
 	/* performing markdown parsing */
 	ob = bufnew(OUTPUT_UNIT);
 
-	for (i = 0; i < iterations; ++i) {
-		ob->size = 0;
-
-		upshtml_renderer(&renderer, render_flags);
-		ups_markdown(ob, ib, &renderer, enabled_extensions);
-		upshtml_free_renderer(&renderer);
-	}
+	sdhtml_renderer(&callbacks, &options, 0);
+	markdown = sd_markdown_new(enabled_extensions, 16, &callbacks, &options);
+	sd_markdown_render(ob, ib->data, ib->size, markdown);
+	sd_markdown_free(markdown);
 
 	/* writing the result to stdout */
-	fwrite(ob->data, 1, ob->size, stdout);
+	ret = fwrite(ob->data, 1, ob->size, stdout);
 
 	/* cleanup */
 	bufrelease(ib);
 	bufrelease(ob);
 
-	return 0;
+	return (ret < 0) ? -1 : 0;
 }
 
 /* vim: set filetype=c: */
