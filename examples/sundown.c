@@ -35,10 +35,10 @@ main(int argc, char **argv)
 	int ret;
 	FILE *in = stdin;
 	unsigned int enabled_extensions = MKDEXT_TABLES | MKDEXT_FENCED_CODE;
+	unsigned int render_flags = HTML_SKIP_HTML | HTML_SKIP_STYLE | HTML_HARD_WRAP;
 
 	struct sd_callbacks callbacks;
 	struct html_renderopt options;
-	options.flags = HTML_SKIP_HTML | HTML_SKIP_STYLE | HTML_HARD_WRAP;
 	struct sd_markdown *markdown;
 
 	/* opening the file if given from the command line */
@@ -64,7 +64,7 @@ main(int argc, char **argv)
 	/* performing markdown parsing */
 	ob = bufnew(OUTPUT_UNIT);
 
-	sdhtml_renderer(&callbacks, &options, 0);
+	sdhtml_renderer(&callbacks, &options, render_flags);
 	markdown = sd_markdown_new(enabled_extensions, 16, &callbacks, &options);
 	sd_markdown_render(ob, ib->data, ib->size, markdown);
 	sd_markdown_free(markdown);
