@@ -1278,12 +1278,14 @@ is_next_headerline(uint8_t *data, size_t size)
 
 /* prefix_quote • returns blockquote prefix length */
 static size_t
-prefix_quote(uint8_t *data, size_t size)
+prefix_quote(struct sd_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t i = 0;
-	if (i < size && data[i] == ' ') i++;
-	if (i < size && data[i] == ' ') i++;
-	if (i < size && data[i] == ' ') i++;
+	if((rndr->ext_flags & MKDEXT_EMAIL_FRIENDLY) != MKDEXT_EMAIL_FRIENDLY) {
+		if (i < size && data[i] == ' ') i++;
+		if (i < size && data[i] == ' ') i++;
+		if (i < size && data[i] == ' ') i++;
+	}
 
 	if (i < size && data[i] == '>') {
 		if (i + 1 < size && data[i + 1] == ' ')
@@ -1370,16 +1372,22 @@ parse_blockquote(struct buf *ob, struct sd_markdown *rndr, uint8_t *data, size_t
 	while (beg < size) {
 		for (end = beg + 1; end < size && data[end - 1] != '\n'; end++);
 
-		pre = prefix_quote(data + beg, end - beg);
-
+		pre = prefix_quote(rndr, data + beg, end - beg);
 		if (pre)
 			beg += pre; /* skipping prefix */
 
 		/* empty line followed by non-quote line */
 		else if (is_empty(data + beg, end - beg) &&
-				(end >= size || (prefix_quote(data + end, size - end) == 0 &&
+				(end >= size || (prefix_quote(rndr, data + end, size - end) == 0 &&
 				!is_empty(data + end, size - end))))
 			break;
+
+		/* break if not an empty non-quote line */
+		else if ((rndr->ext_flags & MKDEXT_EMAIL_FRIENDLY) == MKDEXT_EMAIL_FRIENDLY &&
+				!is_empty(data + beg, end - beg)) {
+			end = beg;
+			break;
+		}
 
 		if (beg < end) { /* copy into the in-place working buffer */
 			/* bufput(work, data + beg, end - beg); */
@@ -1402,7 +1410,7 @@ parse_blockquote(struct buf *ob, struct sd_markdown *rndr, uint8_t *data, size_t
 static size_t
 parse_htmlblock(struct buf *ob, struct sd_markdown *rndr, uint8_t *data, size_t size, int do_render);
 
-/* parse_blockquote • handles parsing of a regular paragraph */
+/* parse_paragraph • handles parsing of a regular paragraph */
 static size_t
 parse_paragraph(struct buf *ob, struct sd_markdown *rndr, uint8_t *data, size_t size)
 {
@@ -1429,6 +1437,12 @@ parse_paragraph(struct buf *ob, struct sd_markdown *rndr, uint8_t *data, size_t 
 		}
 
 		i = end;
+
+		if ((rndr->ext_flags & MKDEXT_EMAIL_FRIENDLY) == MKDEXT_EMAIL_FRIENDLY) {
+			/* Break if block quote starts at next line */
+			if(prefix_quote(rndr, data + end, size - end) > 0)
+				break;
+		}
 	}
 
 	work.size = i;
@@ -2134,7 +2148,7 @@ parse_block(struct buf *ob, struct sd_markdown *rndr, uint8_t *data, size_t size
 			(i = parse_table(ob, rndr, txt_data, end)) != 0)
 			beg += i;
 
-		else if (prefix_quote(txt_data, end))
+		else if (prefix_quote(rndr, txt_data, end))
 			beg += parse_blockquote(ob, rndr, txt_data, end);
 
 		else if (prefix_code(txt_data, end))

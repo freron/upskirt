@@ -55,6 +55,7 @@ enum mkd_extensions {
 	MKDEXT_LAX_HTML_BLOCKS = (1 << 5),
 	MKDEXT_SPACE_HEADERS = (1 << 6),
 	MKDEXT_SUPERSCRIPT = (1 << 7),
+	MKDEXT_EMAIL_FRIENDLY = (1 << 8),
 };
 
 /* sd_callbacks - functions for rendering parsed data */
