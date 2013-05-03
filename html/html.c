@@ -298,7 +298,7 @@ rndr_paragraph(struct buf *ob, const struct buf *text, void *opaque)
 	if (i == text->size)
 		return;
 
-	BUFPUTSL(ob, "<p>");
+	BUFPUTSL(ob, "<p dir=\"auto\">");
 	if (options->flags & HTML_HARD_WRAP) {
 		size_t org;
 		while (i < text->size) {
