@@ -62,7 +62,8 @@ sdhtml_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname)
 
 static inline void escape_html(struct buf *ob, const uint8_t *source, size_t length)
 {
-	houdini_escape_html0(ob, source, length, 0);
+	bufput(ob, source, length);
+	// houdini_escape_html0(ob, source, length, 0);
 }
 
 static inline void escape_href(struct buf *ob, const uint8_t *source, size_t length)
