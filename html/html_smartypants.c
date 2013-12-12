@@ -173,8 +173,14 @@ smartypants_cb__dash(struct buf *ob, struct smartypants_data *smrt, uint8_t prev
 	}
 
 	if (size >= 2 && text[1] == '-') {
-		BUFPUTSL(ob, "&ndash;");
-		return 1;
+		if(size >= 4 && previous_char == '>' && text[2] == ' ' && text[3] == '<') {
+			// A hack to avoid '-- ' being converted to an ndash.
+		}
+		else
+		{
+			BUFPUTSL(ob, "&ndash;");
+			return 1;
+		}
 	}
 
 	bufputc(ob, text[0]);
